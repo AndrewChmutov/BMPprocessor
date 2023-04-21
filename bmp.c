@@ -81,12 +81,8 @@ float **getColorHistogram(FILE *file,
         for (int j = 0; j < rowPixels; j++) {
             for (int c = 0; c < 3; c++) {
                 temp = 0;
-                if (j == 0)
-                    printf("%ld\n", ftell(file));
                 fread(&temp, sizeof(temp), 1, file);
 
-                // if (i == 0 && j < 10)
-                //     printf("%u\n", temp);
 
                 for (int r = 1; r < rangec; r++) {
                     if ((temp >= ranges[r - 1]) && (temp < ranges[r])) {
@@ -104,10 +100,8 @@ float **getColorHistogram(FILE *file,
     float **pixelsPercent = malloc(sizeof(float*) * 3);
     for (int i = 0; i < 3; i++) {
         pixelsPercent[i] = malloc(sizeof(float) * (rangec - 1));
-        for (int j = 0; j < rangec - 1; j++) {
+        for (int j = 0; j < rangec - 1; j++) 
             pixelsPercent[i][j] = (float)pixelsCount[i][j] / colorCount[i];
-            printf("%d - %d\n", pixelsCount[i][j], colorCount[i]);
-        }
 
         free(pixelsCount[i]);
     }
