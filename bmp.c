@@ -1,6 +1,7 @@
 #include "bmp.h"
 #include <stdint.h>
 #include <inttypes.h>
+#include <stdlib.h>
 
 
 void getFileHeader(BITMAPFILEHEADER *bfHeader, FILE *file) {
@@ -51,4 +52,106 @@ void printInfoHeader(BITMAPINFOHEADER *biHeader) {
     printf("  biYPelsPerMeter:\t%d\n", biHeader->biYPelsPerMeter);
     printf("  biClrUsed:\t\t%u\n", biHeader->biClrUsed);
     printf("  biClrImportant:\t%u\n", biHeader->biClrImportant);
+}
+
+
+float **getColorHistogram(FILE *file, 
+                            BITMAPFILEHEADER *bfHeader, 
+                            BITMAPINFOHEADER *biHeader,
+                            WORD *ranges, WORD rangec,
+                            bool freePixels) {
+    size_t rowPixels = biHeader->biWidth;
+    size_t rowCount = biHeader->biHeight;
+    size_t rowLength = (biHeader->biBitCount * rowPixels + 31) / 32;
+    WORD colorCount[3];
+    rowLength *= 4;
+    uint8_t temp;
+
+    int **pixelsCount = malloc(sizeof(int*) * 3);
+    for (int i = 0; i < 3; i++) {
+        pixelsCount[i] = malloc(sizeof(int) * (rangec - 1));
+        colorCount[i] = 0;
+        for (int j = 0; j < rangec - 1; j++)
+            pixelsCount[i][j] = 0;
+    }
+
+    fseek(file, bfHeader->bfOffBits, SEEK_SET);
+    
+    for (int i = 0; i < rowCount; i++) {
+        for (int j = 0; j < rowPixels; j++) {
+            for (int c = 0; c < 3; c++) {
+                temp = 0;
+                if (j == 0)
+                    printf("%ld\n", ftell(file));
+                fread(&temp, sizeof(temp), 1, file);
+
+                // if (i == 0 && j < 10)
+                //     printf("%u\n", temp);
+
+                for (int r = 1; r < rangec; r++) {
+                    if ((temp >= ranges[r - 1]) && (temp < ranges[r])) {
+                        colorCount[c] += 1;
+                        pixelsCount[c][r - 1] += 1;
+                        break;
+                    }
+                }
+            }
+        }
+        fseek(file, rowLength - rowPixels * 3, SEEK_CUR);
+    }
+    
+
+    float **pixelsPercent = malloc(sizeof(float*) * 3);
+    for (int i = 0; i < 3; i++) {
+        pixelsPercent[i] = malloc(sizeof(float) * (rangec - 1));
+        for (int j = 0; j < rangec - 1; j++) {
+            pixelsPercent[i][j] = (float)pixelsCount[i][j] / colorCount[i];
+            printf("%d - %d\n", pixelsCount[i][j], colorCount[i]);
+        }
+
+        free(pixelsCount[i]);
+    }
+    free(pixelsCount);
+
+    if (freePixels == true) {
+        for (int i = 0; i < 3; i++)
+            free(pixelsPercent[i]);
+        free(pixelsPercent);
+        pixelsPercent = NULL;
+    }
+
+    return pixelsPercent;
+}
+
+void printColorHistogram(FILE *file, 
+                            BITMAPFILEHEADER *bfHeader, 
+                            BITMAPINFOHEADER *biHeader) {
+    WORD ranges[16] = {
+        0, 16, 32, 64, 80, 96, 112, 128, 144, 
+        160, 176, 192, 208, 224, 240, 256
+    };
+
+    float **pixelsPercent = getColorHistogram(
+        file, 
+        bfHeader, 
+        biHeader,
+        ranges,
+        16,
+        false
+    );
+
+    char *colors[3] = { "Blue", "Green", "Red" };
+
+    for (int c = 0; c < 3; c++) {
+        printf("%s:\n", colors[c]);
+        for (int i = 1; i < 16; i++) {
+            printf("  %u-%u: %.2f %%\n", ranges[i - 1], ranges[i] - 1, 100.0 * pixelsPercent[c][i - 1]);
+        }
+        printf("\n");
+    }
+
+    for (int i = 0; i < 3; i++)
+        free(pixelsPercent[i]);
+    free(pixelsPercent);
+    pixelsPercent = NULL;
 }
