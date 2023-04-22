@@ -291,7 +291,7 @@ void printSteganography(FILE *file, const char *const name,
         bit++;
     }
 
-    char *text = malloc(sizeof(char) * len);
+    char *text = malloc(len);
 
     for (int i = 0; i < len; i++) {
         bit = 0;
@@ -304,6 +304,8 @@ void printSteganography(FILE *file, const char *const name,
         }
     }
 
-    printf("Decoded text:\n\n%s\n", text);
+    for(int i = 0; i < len; i++)
+        printf("%c", text[i]);
+    printf("\n");
     free(text);
 }
