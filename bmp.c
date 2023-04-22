@@ -149,3 +149,49 @@ void printColorHistogram(FILE *file,
     free(pixelsPercent);
     pixelsPercent = NULL;
 }
+
+
+void convertToGrayscale(FILE *file, const char* const name,
+                            BITMAPFILEHEADER *bfHeader, 
+                            BITMAPINFOHEADER *biHeader) {
+    rewind(file);
+    FILE *newfile = fopen(name, "w");
+
+    uint8_t *header = malloc(bfHeader->bfOffBits);
+    
+    fread(header, sizeof(uint8_t), bfHeader->bfOffBits, file);
+    fwrite(header, sizeof(uint8_t), bfHeader->bfOffBits, newfile);
+    free(header);
+
+    size_t rowPixels = biHeader->biWidth;
+    size_t rowCount = biHeader->biHeight;
+    size_t rowLength = (biHeader->biBitCount * rowPixels + 31) / 32;
+    WORD colorCount[3];
+    rowLength *= 4;
+    uint8_t temp;
+
+
+    
+    for (int i = 0; i < rowCount; i++) {
+        for (int j = 0; j < rowPixels; j++) {
+            uint8_t avg = 0;
+            for (int c = 0; c < 3; c++) {
+                temp = 0;
+                fread(&temp, sizeof(temp), 1, file);
+                avg += temp / 3;
+            }
+            for (int k = 0; k < 3; k++)
+                fputc(avg, newfile);
+        }
+        temp = 0;
+        for (int k = 0; k < rowLength - rowPixels * 3; k++) 
+            fputc(temp, newfile);
+        
+        fseek(file, rowLength - rowPixels * 3, SEEK_CUR);
+    }
+
+    // fseek(newfile, 28, SEEK_SET);
+    // fputc(8, newfile);
+
+    fclose(newfile);
+}

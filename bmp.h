@@ -20,3 +20,7 @@ void printColorHistogram(FILE *file,
                             BITMAPFILEHEADER *bfHeader, 
                             BITMAPINFOHEADER *biHeader);
 
+
+void convertToGrayscale(FILE *file, const char* const name,
+                            BITMAPFILEHEADER *bfHeader, 
+                            BITMAPINFOHEADER *biHeader);

@@ -22,22 +22,33 @@ int main(int argc, char **argv) {
     getFileHeader(&bfHeader, ptrFile);
     getInfoHeader(&biHeader, ptrFile);
 
-    if (argc == 2 || argc == 4) {
+    if (argc == 2) {
         printFileHeader(&bfHeader);
         printInfoHeader(&biHeader);
     }
 
-    if (biHeader.biBitCount != 24 || biHeader.biCompression != 0)
+    if (biHeader.biBitCount != 24 || biHeader.biCompression != 0) {
+        printf("Not supported functional for non 24 pixel size and non-zero compression\n");
         return 0;
+    }
 
-    printf("\n");
 
-    printColorHistogram(
-        ptrFile,
-        &bfHeader,
-        &biHeader
-    );
-
+    if (argc == 2) {
+        printf("\n");
+        printColorHistogram(
+            ptrFile,
+            &bfHeader,
+            &biHeader
+        );
+    }
+    else if (argc == 3) {
+        convertToGrayscale(
+            ptrFile,
+            argv[2],
+            &bfHeader,
+            &biHeader
+        );
+    }
 
     fclose(ptrFile);
 
