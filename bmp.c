@@ -271,3 +271,39 @@ void encodeSteganography(FILE *file, const char *const name,
 
     fclose(newfile);
 }
+
+
+
+void printSteganography(FILE *file, const char *const name,
+                            BITMAPFILEHEADER *bfHeader, 
+                            BITMAPINFOHEADER *biHeader) {
+    fseek(file, bfHeader->bfOffBits, SEEK_SET);
+
+    uint8_t len  = 0;
+    uint8_t temp = 0; 
+    uint8_t bit  = 0;
+
+
+    while (bit < 8) {
+        temp = fgetc(file);
+        len |= (temp & 0x01) << bit;
+
+        bit++;
+    }
+
+    char *text = malloc(sizeof(char) * len);
+
+    for (int i = 0; i < len; i++) {
+        bit = 0;
+        text[i] = 0;
+        while (bit < 8) {
+            temp = fgetc(file);
+            text[i] |= (temp & 0x01) << bit;
+
+            bit++;
+        }
+    }
+
+    printf("Decoded text:\n\n%s\n", text);
+    free(text);
+}

@@ -30,3 +30,8 @@ void encodeSteganography(FILE *file, const char *const name,
                             const char *text,
                             BITMAPFILEHEADER *bfHeader, 
                             BITMAPINFOHEADER *biHeader);
+
+
+void printSteganography(FILE *file, const char *const name,
+                            BITMAPFILEHEADER *bfHeader, 
+                            BITMAPINFOHEADER *biHeader);

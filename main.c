@@ -43,9 +43,13 @@ int main(int argc, char **argv) {
         char choice;
         printf("Decode steganography?[Y/n] ");
         scanf("%c", &choice);
-        printf("\n");
         if (choice == 'Y' || choice == 'y' || choice == '\n') {
-
+            printSteganography(
+                ptrFile,
+                argv[2],
+                &bfHeader,
+                &biHeader
+            );
         }
     }
     else if (argc == 3) {
