@@ -5,7 +5,7 @@
 
 int main(int argc, char **argv) {
     if (argc < 2) {
-        printf("No filename enetered.");
+        printf("No filename enetered.\n");
         return 0;
     }
 
@@ -27,24 +27,40 @@ int main(int argc, char **argv) {
         printInfoHeader(&biHeader);
     }
 
-    if (biHeader.biBitCount != 24 || biHeader.biCompression != 0) {
-        printf("Not supported functional for non 24 pixel size and non-zero compression\n");
-        return 0;
-    }
-
 
     if (argc == 2) {
+        if (biHeader.biBitCount != 24 || biHeader.biCompression != 0) {
+            printf("Not supported functional for non 24 pixel size and non-zero compression\n");
+        }
+        else {
+            printf("\n");
+            printColorHistogram(
+                ptrFile,
+                &bfHeader,
+                &biHeader
+            );
+        }
+        char choice;
+        printf("Decode steganography?[Y/n] ");
+        scanf("%c", &choice);
         printf("\n");
-        printColorHistogram(
-            ptrFile,
-            &bfHeader,
-            &biHeader
-        );
+        if (choice == 'Y' || choice == 'y' || choice == '\n') {
+
+        }
     }
     else if (argc == 3) {
         convertToGrayscale(
             ptrFile,
             argv[2],
+            &bfHeader,
+            &biHeader
+        );
+    }
+    else if (argc == 4) {
+        encodeSteganography(
+            ptrFile,
+            argv[2],
+            argv[3],
             &bfHeader,
             &biHeader
         );

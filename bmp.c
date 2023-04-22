@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 #include <stdlib.h>
+#include <string.h>
 
 
 void getFileHeader(BITMAPFILEHEADER *bfHeader, FILE *file) {
@@ -192,6 +193,81 @@ void convertToGrayscale(FILE *file, const char* const name,
 
     // fseek(newfile, 28, SEEK_SET);
     // fputc(8, newfile);
+
+    fclose(newfile);
+}
+
+
+void encodeSteganography(FILE *file, const char *const name,
+                            const char *text,
+                            BITMAPFILEHEADER *bfHeader, 
+                            BITMAPINFOHEADER *biHeader) {
+    rewind(file);
+
+    int textLength = strlen(text);
+    if (textLength > 256) {
+        printf("Too long text\n");
+        return;
+    }
+
+    char buff[256];
+    strcpy(buff, text); 
+
+
+    FILE *newfile = fopen(name, "w");
+
+    uint8_t *header = malloc(bfHeader->bfOffBits);
+    
+    fread(header, sizeof(uint8_t), bfHeader->bfOffBits, file);
+    fwrite(header, sizeof(uint8_t), bfHeader->bfOffBits, newfile);
+    free(header);
+
+    size_t rowPixels = biHeader->biWidth;
+    size_t rowCount = biHeader->biHeight;
+    size_t rowLength = (biHeader->biBitCount * rowPixels + 31) / 32;
+    WORD colorCount[3];
+    rowLength *= 4;
+    uint8_t temp;
+
+    uint8_t bit = 0;
+    while (bit < 8) {
+        temp = fgetc(file);
+        temp &= ~(1U);
+        temp |= (textLength & 0x01);
+        // printf("%x\n", temp);
+        fputc(temp, newfile);
+        
+        bit++;
+        textLength = textLength >> 1;
+    }
+
+    textLength = strlen(text);
+
+    for (int i = 0; i < textLength; i++) {
+        bit = 0;
+        while (bit < 8) {
+            temp = fgetc(file);
+            temp &= ~(1U);
+            temp |= (buff[i] & 0x01);
+            fputc(temp, newfile);
+            
+            bit++;
+            buff[i] = buff[i] >> 1;
+        }
+    }
+
+    size_t cur = ftell(file);
+
+    uint8_t *remainder = malloc(4096);
+    for (int i = 0; i < (bfHeader->bfSize - cur) / 4096; i++) {
+        fread(remainder, 1, 4096, file);
+        fwrite(remainder, 1, 4096, newfile);
+    }
+
+    fread(remainder, 1, (bfHeader->bfSize - cur) % 4096, file);
+    fwrite(remainder, 1, (bfHeader->bfSize - cur) % 4096, newfile);
+
+    free(remainder);
 
     fclose(newfile);
 }
