@@ -64,14 +64,12 @@ float **getColorHistogram(FILE *file,
     size_t rowPixels = biHeader->biWidth;
     size_t rowCount = biHeader->biHeight;
     size_t rowLength = (biHeader->biBitCount * rowPixels + 31) / 32;
-    WORD colorCount[3];
     rowLength *= 4;
     uint8_t temp;
 
     int **pixelsCount = malloc(sizeof(int*) * 3);
     for (int i = 0; i < 3; i++) {
         pixelsCount[i] = malloc(sizeof(int) * (rangec - 1));
-        colorCount[i] = 0;
         for (int j = 0; j < rangec - 1; j++)
             pixelsCount[i][j] = 0;
     }
@@ -87,7 +85,6 @@ float **getColorHistogram(FILE *file,
 
                 for (int r = 1; r < rangec; r++) {
                     if ((temp >= ranges[r - 1]) && (temp < ranges[r])) {
-                        colorCount[c] += 1;
                         pixelsCount[c][r - 1] += 1;
                         break;
                     }
@@ -102,7 +99,7 @@ float **getColorHistogram(FILE *file,
     for (int i = 0; i < 3; i++) {
         pixelsPercent[i] = malloc(sizeof(float) * (rangec - 1));
         for (int j = 0; j < rangec - 1; j++) 
-            pixelsPercent[i][j] = (float)pixelsCount[i][j] / colorCount[i];
+            pixelsPercent[i][j] = (float)pixelsCount[i][j] / biHeader->biHeight / biHeader->biWidth;
 
         free(pixelsCount[i]);
     }
@@ -167,7 +164,6 @@ void convertToGrayscale(FILE *file, const char* const name,
     size_t rowPixels = biHeader->biWidth;
     size_t rowCount = biHeader->biHeight;
     size_t rowLength = (biHeader->biBitCount * rowPixels + 31) / 32;
-    WORD colorCount[3];
     rowLength *= 4;
     uint8_t temp;
 
@@ -225,7 +221,6 @@ void encodeSteganography(FILE *file, const char *const name,
     size_t rowPixels = biHeader->biWidth;
     size_t rowCount = biHeader->biHeight;
     size_t rowLength = (biHeader->biBitCount * rowPixels + 31) / 32;
-    WORD colorCount[3];
     rowLength *= 4;
     uint8_t temp;
 
