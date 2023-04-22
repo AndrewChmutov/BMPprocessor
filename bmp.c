@@ -153,7 +153,7 @@ void convertToGrayscale(FILE *file, const char* const name,
                             BITMAPFILEHEADER *bfHeader, 
                             BITMAPINFOHEADER *biHeader) {
     rewind(file);
-    FILE *newfile = fopen(name, "w");
+    FILE *newfile = fopen(name, "wb");
 
     uint8_t *header = malloc(bfHeader->bfOffBits);
     
@@ -210,7 +210,7 @@ void encodeSteganography(FILE *file, const char *const name,
     strcpy(buff, text); 
 
 
-    FILE *newfile = fopen(name, "w");
+    FILE *newfile = fopen(name, "wb");
 
     uint8_t *header = malloc(bfHeader->bfOffBits);
     

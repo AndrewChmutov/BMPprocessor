@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
         return 0;
     }
 
-    FILE* ptrFile = fopen(argv[1], "r");
+    FILE* ptrFile = fopen(argv[1], "rb");
 
     if (ptrFile == NULL) {
         printf("Error: cannot open this file: %s\n", argv[1]);
