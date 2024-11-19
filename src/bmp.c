@@ -1,9 +1,9 @@
-#include "bmp.h"
 #include <stdint.h>
 #include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include <bmp.h>
 
 void getFileHeader(BITMAPFILEHEADER *bfHeader, FILE *file) {
     fread(&bfHeader->bfType, sizeof(bfHeader->bfType), 1, file);

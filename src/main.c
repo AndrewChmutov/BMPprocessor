@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "structures.h"
-#include "bmp.h"
+
+#include <bmp.h>
+#include <structures.h>
 
 int main(int argc, char **argv) {
     if (argc < 2) {
